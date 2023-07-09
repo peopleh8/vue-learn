@@ -17,6 +17,11 @@
       v-if="!isPostsLoading"
     />
     <err-title v-else>Loading...</err-title>
+    <post-pagination 
+      v-bind:pages="totalPages" 
+      v-bind:page="page"
+      v-on:paginate="changePage"
+    />
   </div>
 </template>
 
@@ -24,10 +29,11 @@
 import axios from 'axios'
 import PostFrom from '@/components/PostForm'
 import PostList from '@/components/PostList'
+import PostPagination from '@/components/PostPagination'
 
 export default {
   components: {
-    PostFrom, PostList,
+    PostFrom, PostList, PostPagination,
   },
   data() {
     return {
@@ -35,6 +41,9 @@ export default {
       isPostsLoading: false,
       selectedSort: '',
       searchQuery: '',
+      page: 1,
+      limit: 10,
+      totalPages: 1,
       sortOptions: [
         { value: 'id', name: 'By id' },
         { value: 'title', name: 'By name' },
@@ -54,22 +63,37 @@ export default {
     openDialog() {
       this.dialogVisible = true
     },
-    async fetchUsers() {
+    async fetchPosts() {
       this.isPostsLoading = true
       
       try {
-        const { data } = await axios.get('https://jsonplaceholder.typicode.com/posts?_limit=10')
+        const response = await axios.get('https://jsonplaceholder.typicode.com/posts', {
+          params: {
+            _page: this.page,
+            _limit: this.limit,
+          }
+        })
 
-        this.posts = data
+        this.totalPages = Math.ceil(parseInt(response.headers['x-total-count']) / this.limit)
+
+        this.posts = response.data
       } catch (e) {
         console.error(e.message)
       } finally {
         this.isPostsLoading = false
       }
     },
+    changePage(pageNum) {
+      this.page = pageNum
+    }
   },
   mounted() {
-    this.fetchUsers()
+    this.fetchPosts()
+  },
+  watch: {
+    page() {
+      this.fetchPosts()
+    }
   },
   computed: {
     sortedPosts() {
