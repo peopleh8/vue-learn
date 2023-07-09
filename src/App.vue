@@ -1,6 +1,7 @@
 <template>
   <div class="app">
     <h1 class="page-title">Posts page</h1>
+    <my-input v-model="searchQuery" type="text" placeholder="Search..."  />
     <div class="page-controls">
       <my-select v-model="selectedSort" v-bind:options="sortOptions" />
       <my-button v-on:click="openDialog">Create post</my-button>
@@ -11,7 +12,7 @@
       />
     </my-dialog>
     <post-list 
-      v-bind:posts="sortPosts"
+      v-bind:posts="sortedAndSearchedPosts"
       v-on:remove="removePost"
       v-if="!isPostsLoading"
     />
@@ -33,7 +34,9 @@ export default {
       dialogVisible: false,
       isPostsLoading: false,
       selectedSort: '',
+      searchQuery: '',
       sortOptions: [
+        { value: 'id', name: 'By id' },
         { value: 'title', name: 'By name' },
         { value: 'body', name: 'By body' },
       ],
@@ -69,10 +72,19 @@ export default {
     this.fetchUsers()
   },
   computed: {
-    sortPosts() {
+    sortedPosts() {
       return [...this.posts].sort((post1, post2) => {
-        return post1[this.selectedSort]?.localeCompare(post2[this.selectedSort])
+        if (typeof post1[this.selectedSort] === 'string' && typeof post1[this.selectedSort] === 'string') {
+          return post1[this.selectedSort]?.localeCompare(post2[this.selectedSort])
+        }
+
+        if (typeof post1[this.selectedSort] === 'number' && typeof post1[this.selectedSort] === 'number') {
+          return post1[this.selectedSort] - post2[this.selectedSort]
+        }
       })
+    },
+    sortedAndSearchedPosts() {
+      return this.sortedPosts.filter(post => post.title.toLowerCase().includes(this.searchQuery.toLowerCase()))
     }
   },
 }
