@@ -1,6 +1,6 @@
 <template>
   <div class="err-title">
-    <slot></slot>
+    Loading...
   </div> 
 </template>
 

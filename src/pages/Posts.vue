@@ -16,7 +16,7 @@
       v-on:remove="removePost"
       v-if="!isPostsLoading"
     />
-    <err-title v-else>Loading...</err-title>
+    <err-title v-else />
     <div ref="observer" class="observer"></div>
     <!-- <post-pagination 
       v-bind:pages="totalPages" 
