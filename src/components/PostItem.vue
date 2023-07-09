@@ -5,6 +5,7 @@
       <div><strong>Description: </strong> {{ post.body }}</div>
     </div>
     <div class="post__btns">
+      <my-button v-on:click="$router.push(`/posts/${post.id}`)">Open</my-button>
       <my-button v-on:click="$emit('remove', post)">Delete</my-button>
     </div>
   </div> 
@@ -36,5 +37,9 @@
 
   .post__btns {
     margin-left: 10px;
+  }
+
+  .post__btns button:not(:first-child) {
+    margin-left: 5px;
   }
 </style>

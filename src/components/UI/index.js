@@ -3,6 +3,7 @@ import MyInput from '@/components/UI/MyInput'
 import MyDialog from '@/components/UI/MyDialog'
 import ErrTitle from '@/components/UI/ErrTitle'
 import MySelect from '@/components/UI/MySelect'
+import PageTitle from '@/components/UI/PageTitle'
 
 export default [
   MyButton,
@@ -10,4 +11,5 @@ export default [
   MyDialog,
   ErrTitle,
   MySelect,
+  PageTitle
 ]
