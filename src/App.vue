@@ -17,11 +17,12 @@
       v-if="!isPostsLoading"
     />
     <err-title v-else>Loading...</err-title>
-    <post-pagination 
+    <div ref="observer" class="observer"></div>
+    <!-- <post-pagination 
       v-bind:pages="totalPages" 
       v-bind:page="page"
       v-on:paginate="changePage"
-    />
+    /> -->
   </div>
 </template>
 
@@ -29,11 +30,11 @@
 import axios from 'axios'
 import PostFrom from '@/components/PostForm'
 import PostList from '@/components/PostList'
-import PostPagination from '@/components/PostPagination'
+// import PostPagination from '@/components/PostPagination'
 
 export default {
   components: {
-    PostFrom, PostList, PostPagination,
+    PostFrom, PostList,
   },
   data() {
     return {
@@ -83,18 +84,51 @@ export default {
         this.isPostsLoading = false
       }
     },
-    changePage(pageNum) {
-      this.page = pageNum
-    }
+    async loadMorePosts() {
+      this.page += 1
+
+      try {
+        const response = await axios.get('https://jsonplaceholder.typicode.com/posts', {
+          params: {
+            _page: this.page,
+            _limit: this.limit,
+          }
+        })
+
+        this.totalPages = Math.ceil(parseInt(response.headers['x-total-count']) / this.limit)
+
+        this.posts = [...this.posts, ...response.data]
+      } catch (e) {
+        console.error(e.message)
+      }
+    },
+    // changePage(pageNum) {
+    //   this.page = pageNum
+    // }
   },
   mounted() {
     this.fetchPosts()
-  },
-  watch: {
-    page() {
-      this.fetchPosts()
+
+    const options = {
+      rootMargin: "0px",
+      threshold: 1.0,
     }
+
+    const callback = (entries, observer) => {
+      if (entries[0].isIntersecting && this.page < this.totalPages) {
+        this.loadMorePosts()
+      }
+    }
+
+    const observer = new IntersectionObserver(callback, options)
+
+    observer.observe(this.$refs.observer)
   },
+  // watch: {
+  //   page() {
+  //     this.fetchPosts()
+  //   }
+  // },
   computed: {
     sortedPosts() {
       return [...this.posts].sort((post1, post2) => {
@@ -108,7 +142,7 @@ export default {
       })
     },
     sortedAndSearchedPosts() {
-      return this.sortedPosts.filter(post => post.title.toLowerCase().includes(this.searchQuery.toLowerCase()))
+      return this.sortedPosts.filter(post => post.title?.toLowerCase().includes(this.searchQuery?.toLowerCase()))
     }
   },
 }
@@ -135,5 +169,11 @@ export default {
     display: flex;
     align-items: center;
     justify-content: space-between;
+  }
+
+  .observer {
+    width: 100%;
+    height: 10px;
+    background: red;
   }
 </style>
